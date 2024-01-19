@@ -2,10 +2,10 @@ import { revalidatePath } from 'next/cache'
 import { NextRequest } from 'next/server'
 
 /**
- * Call this endpoint with REVALIDATE_SECRET_TOKEN & path to regenerate
+ * Call this endpoint with REVALIDATE_SECRET_TOKEN & path to revalidate / regenerate
  */
 export async function POST(request: NextRequest) {
-  const { token, path } = await request.json()
+  const { token, path, regenerate } = await request.json()
 
   // Check for secret to confirm this is a valid request
   if (token !== process.env.REVALIDATE_SECRET_TOKEN) {
@@ -13,9 +13,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    revalidatePath(path)
-    await fetch(`${request.nextUrl.origin}${path}`)
-    return Response.json({ message: `Regenerated ${path}` })
+    revalidatePath(path) // invalidate the cache
+    if (regenerate) {
+      const response = await fetch(`${request.nextUrl.origin}${path}`)
+      await response.text() // regenerate page
+      return Response.json({ message: `Regenerated ${path}` })
+    }
+    return Response.json({ message: `Revalidated ${path}` })
   } catch (err) {
     return new Response(JSON.stringify({ message: `Error revalidating ${path}` }), { status: 500 })
   }
