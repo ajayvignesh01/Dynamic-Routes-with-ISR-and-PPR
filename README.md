@@ -17,13 +17,15 @@
 - It is basically the best of both worlds: ISR for the static portions, SSR for the dynamic portions.
 
 ## So what's this repo about?
-- In this repo, we will explore how we can use the ISR & SSR capabilities of PPR to provide the best user experience in dynamic routes when using the app router.
-- It is important to note that this repo focuses on two types of dynamic routes:
+- In this repo, we will explore how we can use ISR & PPR to provide the best user experience in dynamic routes when using the app router.
+- It is important to note that this repo focuses on three types of dynamic routes:
   - Generate static pages after building your app.
     - For example, let's say you have a blog, and you want to publish a new article under a dynamic route `blog/[slug]`. You can do so by creating a webhook to hit the `/api/revalidate` api with the path to generate in the POST body.
-  - Have changing data as a result of programmatically identifiable actions.
-    - For example, in that same blog, if you want to update the home page after publishing the new article. You can do so by creating a webhook to hit the `/api/revalidate` api with the path to regenerate in the POST body.
+  - Update static pages after building your app.
+    - For example, in that same blog, if you want to update the home page after publishing the new article. You can do so by creating another webhook to hit the `/api/revalidate` api with the path to regenerate in the POST body.
     - Or if you updated an article... same idea.
+  - For frequently updating data, you can still use PPR, and use `export const dynamic = "force-dynamic"`. You get the benefits of ISR to deliver the instant static shell, while SSR kicks in on every request to make sure the data is up-to-date.
+    - This will cause every user to wait for the dynamic part to load in on each request. But the user experience is improved by PPR showing the static shell instantly.
   
 
 ## Let's get started!
@@ -33,16 +35,21 @@
 - On every new slug you visit, PPR kicks in by delivering the static shell instantly, while generating the dynamic part. 
   - Now try reloading the page and notice that the timestamp doesn't change, you are seeing a cached page delivered instantly. You can also confirm this by looking in the server logs (your IDE terminal). You will see that the previous request was a `cache: MISS`, while this request was a `cache: HIT`.
 
-- Now try clicking on the `Regenerate` button and wait for it to complete. Refresh the page, and you will once again be delivered a cached page instantly but notice the time is more recent. This is because our regenerate api route has not only invalidated the cache (`revalidatePath()`), but also regenerated the page, meaning the first user will get a cached page delivered instantly.
+- Now try clicking on the `Regenerate` button and wait for it to complete. Refresh the page, and you will once again be delivered a cached page instantly but notice the time is more recent. This is because our revalidate api route has not only invalidated the cache (`revalidatePath()`), but also regenerated the page, meaning the first user will get a cached page delivered instantly.
   - This is the same behavior as using `revalidate()` in the pages router
   - In the app router, just using `revalidatePath()` only invalidates/purges the cache, and the next user to visit the page has to wait for the dynamic part to be generated at request time.
-  - It is important to note that the Regenerate Button is soley to demonstrate the power of on-demand ISR with PPR. Normally, you would call `api/revalidate` from a page different from the one you are trying to regenerate.
+  - It is important to note that the Regenerate Button is solely to demonstrate the power of on-demand ISR with PPR. Normally, you would call `api/revalidate` from a page different from the one you are trying to regenerate.
 
 ## Other patterns...
-- For frequently updating data, you can still use PPR, and use `export const dynamic = "force-dynamic"`. You get the benefits of ISR to deliver the instant static shell, while SSR kicks in on every request to make sure the data is up-to-date.
-  - This will cause every user to wait for the dynamic part to load in on each request. But the user experience is improved by PPR showing the static shell instantly.
-- For data updating at a predictable time interval, you can still use PPR, and combine it with `{ revalidate: 10}` in your fetch requests. Make sure you adjust the time (10 ms) according to your requirements. 
-  - This will cause the first user after every 10 seconds to wait for the dynamic part to load, while PPR shows the static shell instantly. All subsequent requests within the next 10 seconds will see a cached page delivered instantly. And then the loop repeats.
+- For data updating at a predictable time interval, you might think you can use PPR with something like `{ revalidate: 10}` in your fetch requests, but this seems to be a little buggy as of Next.js 14.1.1-canary.0.
+  - On the first visit to a slug, you will get the PPR experience, but after 10 seconds, it looks like we just get normal SSR behavior (or worse).
+    - First user to visit a new slug gets PPR experience. Static shell delivered instantly, dynamic part streams in later. ✅
+    - Subsequent users within 10 seconds get cached page served instantly. ✅
+    - First user after 10 seconds get served nothing while page generates. After page generates, they are served the cached page. ❌ 
+      - Being served the old cached (stale) page is expected, but it seems that you are only served that stale data after waiting for the regeneration. This is not expected behavior. You should be served the stale data instantly.
+      - This is also the case with PPR disabled, so it seems like a problem with `revalidate` rather than PPR
+    - Next user within the next 10 seconds is served the new cached page instantly ✅
+- If you need to purge cache often but don't have frequent users, you might be better off just using revalidatePath() instead of also regenerating the page each time. This could save you compute resource, especially when using serverless.
 
 ## Learn More
 

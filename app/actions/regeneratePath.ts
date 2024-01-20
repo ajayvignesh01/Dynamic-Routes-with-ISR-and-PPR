@@ -17,7 +17,7 @@ export async function regeneratePath(path: string) {
     body: JSON.stringify({
       token: process.env.REVALIDATE_SECRET_TOKEN,
       path: path,
-      regenerate: true
+      regenerate: true // set to false if you want to only purge the cache and not regenerate it (next user to visit page will trigger generating the page and caching it)
     }),
     cache: 'no-cache' // so that we can revalidate the same page multiple times
   })

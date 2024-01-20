@@ -3,6 +3,9 @@ import { RegenerateButton } from '@/app/[slug]/regenerate-button'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+// uncomment this to make the page generate on every visit
+// export const dynamic = 'force-dynamic'
+
 export default function SharePage({ params }: { params: { slug: string } }) {
   const slug = params.slug
 
