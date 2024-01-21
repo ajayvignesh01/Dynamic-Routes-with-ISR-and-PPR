@@ -1,6 +1,5 @@
 'use client'
 
-import { regeneratePath } from '@/app/actions/regeneratePath'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 
@@ -12,9 +11,19 @@ export function RegenerateButton({ path }: { path: string }) {
       <Button
         onClick={async () => {
           setIsLoading(true)
-          const response = await regeneratePath(path)
+          const response = await fetch('/api/revalidate', {
+            method: 'POST',
+            body: JSON.stringify({
+              token: process.env.REVALIDATE_SECRET_TOKEN,
+              path: path,
+              regenerate: true // set to false if you want to only purge the cache and not regenerate it (next user to visit page will trigger generating the page and caching it)
+            }),
+            cache: 'no-cache' // so that we can revalidate the same page multiple times
+          })
+          const json = (await response.json()) as { message: string }
+
+          setResponse({ ...json, status: response.status })
           setIsLoading(false)
-          setResponse(response)
         }}
         loading={isLoading}
       >

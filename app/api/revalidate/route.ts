@@ -7,10 +7,10 @@ import { NextRequest } from 'next/server'
 export async function POST(request: NextRequest) {
   const { token, path, regenerate } = await request.json()
 
-  // Check for secret to confirm this is a valid request
-  if (token !== process.env.REVALIDATE_SECRET_TOKEN) {
-    return new Response(JSON.stringify({ message: 'Invalid token' }), { status: 401 })
-  }
+  // Check for secret to confirm this is a valid request (enable in production - can't be called from client like in example)
+  // if (token !== process.env.REVALIDATE_SECRET_TOKEN) {
+  //   return new Response(JSON.stringify({ message: 'Invalid token' }), { status: 401 })
+  // }
 
   try {
     revalidatePath(path) // invalidate the cache
