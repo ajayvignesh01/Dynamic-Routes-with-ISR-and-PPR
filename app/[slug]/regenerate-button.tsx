@@ -14,7 +14,7 @@ export function RegenerateButton({ path }: { path: string }) {
           const response = await fetch('/api/revalidate', {
             method: 'POST',
             body: JSON.stringify({
-              token: process.env.REVALIDATE_SECRET_TOKEN,
+              // token: process.env.REVALIDATE_SECRET_TOKEN, // this env is not accessible client-side
               path: path,
               regenerate: true // set to false if you want to only purge the cache and not regenerate it (next user to visit page will trigger generating the page and caching it)
             }),
