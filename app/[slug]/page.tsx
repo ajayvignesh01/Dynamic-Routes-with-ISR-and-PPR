@@ -1,5 +1,5 @@
 import { DynamicContent } from '@/app/[slug]/dynamic-content'
-// import { RegenerateButton } from '@/app/[slug]/regenerate-button'
+import { RegenerateButton } from '@/app/[slug]/regenerate-button'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
@@ -7,17 +7,15 @@ import { Suspense } from 'react'
 // export const dynamic = 'force-dynamic'
 
 export default function SharePage({ params }: { params: { slug: string } }) {
+  const slug = params.slug
+
   return (
     <div className='flex h-screen flex-col items-center justify-center space-y-8 text-center font-mono'>
-      {/*<Suspense>*/}
-      {/*  <p>/{params.slug}</p>*/}
-      {/*</Suspense>*/}
+      <p>/{slug}</p>
       <Suspense fallback={<p>Generating...</p>}>
-        <DynamicContent slug={params.slug} />
+        <DynamicContent slug={slug} />
       </Suspense>
-      {/*<Suspense>*/}
-      {/*  <RegenerateButton path={`/${params.slug}`} />*/}
-      {/*</Suspense>*/}
+      <RegenerateButton path={`/${slug}`} />
       <Link
         href={'https://github.com/0x-Legend/On-Demand-ISR-with-PPR'}
         target='_blank'
