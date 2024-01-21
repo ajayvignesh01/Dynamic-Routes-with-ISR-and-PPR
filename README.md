@@ -1,3 +1,6 @@
+# DEMO ONLY WORKS IN DEV SERVER
+PPR is still an experimental feature, and does not yet support dynamic routes. This demo uses a hacky technicality of dev server to simulate what PPR would look like in dynamic routes.
+
 # Optimizing Dynamic Routes with ISR & PPR
 
 A big pain point with dynamic routes is that they can be slow to render and result in a poor user experience especially during serverless function cold-starts. Using the new experimental partial prerendering in next@canary, we can drastically improve the user experience for dynamic routes. Let's dive in!
