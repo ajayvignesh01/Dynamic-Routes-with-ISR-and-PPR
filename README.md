@@ -1,4 +1,4 @@
-# DEMO ONLY WORKS IN DEV SERVER!
+# DEMO ONLY WORKS IN DEV SERVER
 PPR is still an experimental feature, and does not yet support dynamic routes. This demo uses a hacky technicality of dev server to simulate what PPR would look like in dynamic routes.
 
 # Optimizing Dynamic Routes with ISR & PPR
